@@ -88,7 +88,7 @@ public class DynamicArray {
     public static void main(String[] args) {
         int[] elements = { 1, 5, 10, 50, 100, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 1000000,
                 10000000 };
-        int inhalt = 3;
+        int inhalt = 0;
 
         System.out.printf("%nElemente    ; dynamisch/µs; statisch/µs");
 
@@ -117,6 +117,7 @@ public class DynamicArray {
 
         for (int j = 0; j < elements.length; j++) {
 
+            //
             LinkedList d = new LinkedList(new Node(inhalt));
             for (int i = 0; i < elements[j]; i++) {
                 d.add(inhalt);
@@ -133,14 +134,13 @@ public class DynamicArray {
                 t1 = System.nanoTime() - t1;
                 count1 = (count1 + t1) / 2;
             }
-
+            //
             int staticArray[] = new int[elements[j]];
             for (int i = 0; i < elements[j]; i++) {
-                staticArray[i] = inhalt;
+                staticArray[i] = inhalt++;
             }
-            long t2 = System.nanoTime();
             long count2 = 0;
-            t2 = System.nanoTime();
+            long t2 = System.nanoTime();
 
             staticArray = mergeSort(staticArray);
 
