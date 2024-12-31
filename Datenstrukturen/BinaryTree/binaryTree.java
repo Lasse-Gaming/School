@@ -25,15 +25,34 @@ public class binaryTree {
         return searchHelper(root, value);
     }
 
+    /*
+     * private boolean searchHelper(Node node, int value) {
+     * if (node == null) {
+     * return false; // Basisfall: Kein Knoten vorhanden
+     * }
+     * if (node.getValue() == value) {
+     * return true; // Zielwert gefunden
+     * }
+     * // Suche im linken und rechten Teilbaum
+     * return searchHelper(node.getLeft(), value) || searchHelper(node.getRight(),
+     * value);
+     * }
+     */
+
     private boolean searchHelper(Node node, int value) {
         if (node == null) {
-            return false; // Basisfall: Kein Knoten vorhanden
+            return false; // Basisfall: Wert nicht gefunden
         }
-        if (node.getValue() == value) {
-            return true; // Zielwert gefunden
+
+        if (value == node.getValue()) {
+            return true; // Wert gefunden
         }
-        // Suche im linken und rechten Teilbaum
-        return searchHelper(node.getLeft(), value) || searchHelper(node.getRight(), value);
+
+        if (value < node.getValue()) {
+            return searchHelper(node.getLeft(), value); // Links weitersuchen
+        } else {
+            return searchHelper(node.getRight(), value); // Rechts weitersuchen
+        }
     }
 
     public int getMin() {
@@ -41,15 +60,7 @@ public class binaryTree {
     }
 
     private int getMinHelper(Node node) {
-        if (node == null) {
-            return Integer.MAX_VALUE; // Rückgabe eines großen Werts für leere Teilbäume
-        }
-        // Finde den kleinsten Wert im linken und rechten Teilbaum
-        int leftMin = getMinHelper(node.getLeft());
-        int rightMin = getMinHelper(node.getRight());
-        // Der kleinste Wert ist der aktuelle Wert oder der kleinste Wert in den
-        // Teilbäumen
-        return Math.min(node.getValue(), Math.min(leftMin, rightMin));
+        return node.getLeft() == null ? node.getValue() : getMaxHelper(node.getLeft());
     }
 
     public int getMax() {
@@ -57,15 +68,7 @@ public class binaryTree {
     }
 
     private int getMaxHelper(Node node) {
-        if (node == null) {
-            return Integer.MIN_VALUE; // Rückgabe eines kleinen Werts für leere Teilbäume
-        }
-        // Finde den größten Wert im linken und rechten Teilbaum
-        int leftMax = getMaxHelper(node.getLeft());
-        int rightMax = getMaxHelper(node.getRight());
-        // Der größte Wert ist der aktuelle Wert oder der größte Wert in den
-        // Teilbäumen
-        return Math.max(node.getValue(), Math.max(leftMax, rightMax));
+        return node.getRight() == null ? node.getValue() : getMaxHelper(node.getRight());
     }
 
     public int countNodesWithValue(int value) {
