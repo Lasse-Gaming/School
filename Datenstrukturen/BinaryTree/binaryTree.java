@@ -1,21 +1,44 @@
 package BinaryTree;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class binaryTree {
 
-    Node root = null;
-    Node tmp;
+    private Node root = null;
+    private Node tmp = null;
 
     public static void main(String[] args) {
         binaryTree bst = new binaryTree();
-        bst.insert(10);
+        bst.insert(6);
+        for (int i = 0; i < 10; i++) {
+            bst.insert(10);
+        }
         bst.insert(5);
         bst.insert(6);
         bst.insert(4);
         bst.insert(14);
         bst.insert(11);
         bst.insert(20);
+        bst.insert(14);
+        bst.insert(2);
+        bst.insert(3);
+        bst.insert(1);
+        System.out.println(Arrays.toString(bst.toArray()));
         bst.print();
-        System.out.println(bst.search(6));
+        System.out.println(bst.searchNodeWithChildNodewithValue(bst.getRoot(), 4).getValue());
+        // for (int i = 0; i < 2; i++) {
+        bst.deleteAll(10);
+        // }
+        // bst.deleteOne(6);
+        // bst.deleteOne(6);
+        bst.print();
+        // System.out.println();
+    }
+
+    public Node getRoot() {
+        return root;
     }
 
     public boolean isEmpty() {
@@ -122,6 +145,125 @@ public class binaryTree {
         }
     }
 
+    public void clear() {
+        root = null;
+    }
+
+    public void deleteOne(int value) {
+
+        if (!this.search(value))
+            return;
+        Node parent = null;
+        Node possibleParent = searchNodeWithChildNodewithValue(root, value);
+        while (possibleParent != null) {
+            parent = possibleParent;
+            if (value < parent.getValue()) {
+                possibleParent = searchNodeWithChildNodewithValue(possibleParent.getLeft(), value);
+            } else {
+                possibleParent = searchNodeWithChildNodewithValue(possibleParent.getRight(), value);
+            }
+        }
+        System.out.println("while schleife zu ende");
+        deleteOneHelper(parent, value);
+
+    }
+
+    private void deleteOneHelper(Node parent, int value) {
+        if (parent == null && value == root.getValue()) {
+            tmp = root.getRight();
+            root = root.getLeft();
+            insertNode(tmp);
+
+        } else {
+            if (parent.getLeft() != null && parent.getLeft().getValue() == value) {
+                tmp = parent.getLeft().getRight();
+                parent.setLeft(parent.getLeft().getLeft());
+                insertNode(tmp);
+
+            } else {
+                tmp = parent.getRight().getRight();
+                parent.setRight(parent.getRight().getLeft());
+                insertNode(tmp);
+            }
+        }
+    }
+
+    public void deleteAll(int value) {
+        Node parent = searchNodeWithChildNodewithValue(root, value);
+        while (parent != null) {
+            deleteOneHelper(parent, value);
+            parent = searchNodeWithChildNodewithValue(root, value);
+        }
+    }
+
+    private Node searchNodeWithChildNodewithValue(Node node, int value) {
+        if (node == null) {
+            return null;
+        }
+        if (value < node.getValue()) {
+            if (node.getLeft() != null && node.getLeft().getValue() == value) {
+                return node;
+            } else {
+                return searchNodeWithChildNodewithValue(node.getLeft(), value);
+            }
+        } else {
+            if (node.getRight() != null && node.getRight().getValue() == value) {
+                return node;
+            } else {
+                return searchNodeWithChildNodewithValue(node.getRight(), value);
+            }
+        }
+    }
+
+    private void insertNode(Node node) {
+        if (root == null) {
+            root = node;
+            return;
+        }
+        if (node != null) {
+            insertNodeHelper(root, node);
+        }
+    }
+
+    private void insertNodeHelper(Node node, Node insertNode) {
+        if (node.getValue() > insertNode.getValue()) {
+            if (node.getLeft() == null) {
+                node.setLeft(insertNode);
+                return;
+            } else {
+                insertNodeHelper(node.getLeft(), insertNode);
+            }
+        } else {
+            if (node.getRight() == null) {
+                node.setRight(insertNode);
+            } else {
+                insertNodeHelper(node.getRight(), insertNode);
+            }
+        }
+    }
+
+    public int[] toArray() {
+        List<Integer> sortedValues = new ArrayList<>();
+        toArrayHelper(root, sortedValues);
+
+        // Konvertiere die Liste in ein Array
+        return sortedValues.stream().mapToInt(i -> i).toArray();
+    }
+
+    private void toArrayHelper(Node node, List<Integer> list) {
+        if (node == null) {
+            return;
+        }
+        // Besuche den linken Teilbaum
+        toArrayHelper(node.getLeft(), list);
+
+        // Füge den aktuellen Knotenwert hinzu
+        list.add(node.getValue());
+
+        // Besuche den rechten Teilbaum
+        toArrayHelper(node.getRight(), list);
+    }
+
     public void print() {
         printHelper(root, "", true);
     }
@@ -132,6 +274,17 @@ public class binaryTree {
             printHelper(node.leftNode, indent + (isRight ? "    " : "|   "), false);
             printHelper(node.rightNode, indent + (isRight ? "    " : "|   "), true);
         }
+    }
+
+    public int depth() {
+        return depthHelper(root);
+    }
+
+    private int depthHelper(Node node) {
+        if (node == null) {
+            return 0;
+        }
+        return 1 + Math.max(depthHelper(node.getLeft()), depthHelper(node.getRight()));
     }
 
     // to balance out use the median
@@ -164,5 +317,9 @@ class Node {
 
     public void setRight(Node right) {
         this.rightNode = right;
+    }
+
+    public String toString() {
+        return String.valueOf(value);
     }
 }
