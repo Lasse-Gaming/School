@@ -2,7 +2,9 @@ package BinaryTree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class binaryTree {
 
@@ -10,30 +12,35 @@ public class binaryTree {
     private Node tmp = null;
 
     public static void main(String[] args) {
+        System.out.println(14 / 2);
+        System.exit(0);
         binaryTree bst = new binaryTree();
         bst.insert(6);
-        for (int i = 0; i < 10; i++) {
-            bst.insert(10);
-        }
+        // for (int i = 0; i < 20; i++) {
+        bst.insert(10);
+        // }
         bst.insert(5);
-        bst.insert(6);
+        // bst.insert(6);
         bst.insert(4);
-        bst.insert(14);
+        // bst.insert(14);
         bst.insert(11);
         bst.insert(20);
         bst.insert(14);
         bst.insert(2);
         bst.insert(3);
         bst.insert(1);
+        bst.insert(7);
         System.out.println(Arrays.toString(bst.toArray()));
         bst.print();
         System.out.println(bst.searchNodeWithChildNodewithValue(bst.getRoot(), 4).getValue());
         // for (int i = 0; i < 2; i++) {
-        bst.deleteAll(10);
+        // bst.deleteAll(10);
         // }
+        bst.balance();
         // bst.deleteOne(6);
         // bst.deleteOne(6);
         bst.print();
+        System.out.println(bst.depth());
         // System.out.println();
     }
 
@@ -287,7 +294,38 @@ public class binaryTree {
         return 1 + Math.max(depthHelper(node.getLeft()), depthHelper(node.getRight()));
     }
 
-    // to balance out use the median
+    public void balance() {
+        int[] lst = toArray();
+        Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+        int element = lst[0];
+        int count = 1;
+        ArrayList<Integer> lstWithoutDuplicates = new ArrayList<>();
+        for (int i = 1; i < lst.length; i++) {
+            if (lst[i] == element) {
+                count++;
+            } else {
+                lstWithoutDuplicates.add(element);
+                map.put(element, count);
+                element = lst[i];
+                count = 1;
+            }
+        }
+        root = balanceHelper(lstWithoutDuplicates.stream().mapToInt(i -> i).toArray(), 0, lst.length - 1, map);
+
+        // map.put(,);
+        // map.get();
+    }
+
+    public Node balanceHelper(int[] values, int start, int end, Map<Integer, Integer> map) {
+
+        if (start > end)
+            return null;
+        int mid = (start + end) / 2;
+        Node node = new Node(values[mid]);
+        node.leftNode = balanceHelper(values, start, mid - 1, map);
+        node.rightNode = balanceHelper(values, mid + 1, end, map);
+        return node;
+    }
 }
 
 class Node {
