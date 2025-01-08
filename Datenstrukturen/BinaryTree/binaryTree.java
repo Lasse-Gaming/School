@@ -12,8 +12,7 @@ public class binaryTree {
     private Node tmp = null;
 
     public static void main(String[] args) {
-        System.out.println(14 / 2);
-        System.exit(0);
+        // System.exit(0);
         binaryTree bst = new binaryTree();
         bst.insert(6);
         // for (int i = 0; i < 20; i++) {
@@ -23,6 +22,7 @@ public class binaryTree {
         // bst.insert(6);
         bst.insert(4);
         // bst.insert(14);
+        bst.insert(11);
         bst.insert(11);
         bst.insert(20);
         bst.insert(14);
@@ -310,7 +310,10 @@ public class binaryTree {
                 count = 1;
             }
         }
-        root = balanceHelper(lstWithoutDuplicates.stream().mapToInt(i -> i).toArray(), 0, lst.length - 1, map);
+        map.put(element, count);
+        // lstWithoutDuplicates.stream().mapToInt(i -> i).toArray()
+        root = balanceHelper(lst, 0,
+                lst.length - 1, map);
 
         // map.put(,);
         // map.get();
@@ -320,10 +323,32 @@ public class binaryTree {
 
         if (start > end)
             return null;
-        int mid = (start + end) / 2;
-        Node node = new Node(values[mid]);
-        node.leftNode = balanceHelper(values, start, mid - 1, map);
-        node.rightNode = balanceHelper(values, mid + 1, end, map);
+        int mid = Math.ceilDiv(start + end, 2);
+        int midValue = values[mid];
+        Node node = new Node(midValue);
+        tmp = node;
+        for (int i = 1; i < map.get(midValue); i++) {
+            tmp.setRight(new Node(midValue));
+            tmp = tmp.getRight();
+        }
+        int substractCounter = 1;
+        int addCounter = 1;
+        for (int i = 1; i < mid; i++) {
+            if (mid != 0 && midValue == values[mid - i]) {
+                substractCounter++;
+            }
+            if (mid + i != values.length && midValue == values[mid + i]) {
+                addCounter++;
+            }
+            if (mid * 2 > values.length && mid + i == values.length) {
+                break;
+            }
+            if (midValue != values[mid + i] && midValue != values[mid - i]) {
+                break;
+            }
+        }
+        node.setLeft(balanceHelper(values, start, mid - substractCounter, map));
+        tmp.setRight(balanceHelper(values, mid + addCounter, end, map));
         return node;
     }
 }
