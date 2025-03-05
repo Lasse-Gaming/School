@@ -3,9 +3,17 @@
     "java.project.sourcePaths": [
         ".",
         "Datenstrukturen",
+<<<<<<< HEAD
         "GeoQuiz"
     ],
     "java.project.referencedLibraries": [
         "GeoQuiz\\mysql-connector-java-5.0.8-bin.jar"
+=======
+        "GUI"
+    ],
+    "java.project.referencedLibraries": [
+        "lib\\jsoup-1.18.3.jar",
+        "c:\\Users\\bettm\\OneDrive\\Dokumente\\Informatik\\School\\lib\\jsoup-1.18.3.jar"
+>>>>>>> 46fb69ea42b6f32ea3ff37cc849addc35fb58ee3
     ]
 }
