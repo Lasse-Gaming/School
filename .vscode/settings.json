@@ -1,3 +1,11 @@
 {
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.project.sourcePaths": [
+        ".",
+        "Datenstrukturen",
+        "GeoQuiz"
+    ],
+    "java.project.referencedLibraries": [
+        "GeoQuiz\\mysql-connector-java-5.0.8-bin.jar"
+    ]
 }

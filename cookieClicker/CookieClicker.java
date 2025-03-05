@@ -1,3 +1,5 @@
+package cookieClicker;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -45,7 +47,8 @@ public class CookieClicker {
         // Center Panel for the click button
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new GridBagLayout());
-        ImageIcon cookieIcon = new ImageIcon("cookie.png"); // Ensure cookie.png is in the same directory or provide full path
+        ImageIcon cookieIcon = new ImageIcon("cookie.png"); // Ensure cookie.png is in the same directory or provide
+                                                            // full path
         clickButton = new JButton(cookieIcon);
         clickButton.setBorderPainted(false);
         clickButton.setContentAreaFilled(false);
@@ -105,18 +108,19 @@ public class CookieClicker {
         });
         rightPanel.add(cookieLabButton);
 
-        cookieFactoryButton = createUpgradeButton("Cookie Factory (Cost: " + cookieFactoryCost + ")", new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (cookieCount >= cookieFactoryCost) {
-                    cookieCount -= cookieFactoryCost;
-                    cookieFactoryCount++;
-                    passiveIncome += 20;
-                    cookieFactoryCost *= 2;
-                    updateUI();
-                }
-            }
-        });
+        cookieFactoryButton = createUpgradeButton("Cookie Factory (Cost: " + cookieFactoryCost + ")",
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (cookieCount >= cookieFactoryCost) {
+                            cookieCount -= cookieFactoryCost;
+                            cookieFactoryCount++;
+                            passiveIncome += 20;
+                            cookieFactoryCost *= 2;
+                            updateUI();
+                        }
+                    }
+                });
         rightPanel.add(cookieFactoryButton);
 
         rebirthButton = createUpgradeButton("Rebirth (Cost: " + rebirthCost + ")", new ActionListener() {
@@ -127,9 +131,12 @@ public class CookieClicker {
                     cookiesPerClick = 1;
                     upgradeCost = 10;
                     passiveIncome = 0;
-                    grandmaCount = 0; grandmaCost = 50;
-                    cookieLabCount = 0; cookieLabCost = 200;
-                    cookieFactoryCount = 0; cookieFactoryCost = 500;
+                    grandmaCount = 0;
+                    grandmaCost = 50;
+                    cookieLabCount = 0;
+                    cookieLabCost = 200;
+                    cookieFactoryCount = 0;
+                    cookieFactoryCost = 500;
                     rebirthMultiplier++;
                     rebirthCost *= 2;
                     updateUI();
