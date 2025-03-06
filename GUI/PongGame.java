@@ -1,3 +1,5 @@
+package GUI;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +14,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     private int PADDLE_WIDTH_1 = 10, PADDLE_WIDTH_2 = 10, PADDLE_HEIGHT_1 = 60, PADDLE_HEIGHT_2 = 60;
     private final int BALL_SIZE = 20;
     private Timer timer;
-    
+
     // Powerup-Position und Status
     private int powerupX = -50, powerupY = -50;
     private boolean powerUpSpawned = false;
@@ -25,9 +27,13 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         timer.start();
     }
 
-    public void resetStats(){
-        PADDLE_WIDTH_1 = 10; PADDLE_WIDTH_2 = 10; PADDLE_HEIGHT_1 = 60; PADDLE_HEIGHT_2 = 60;
-        ballXDir = -1; ballYDir = -2;
+    public void resetStats() {
+        PADDLE_WIDTH_1 = 10;
+        PADDLE_WIDTH_2 = 10;
+        PADDLE_HEIGHT_1 = 60;
+        PADDLE_HEIGHT_2 = 60;
+        ballXDir = -1;
+        ballYDir = -2;
     }
 
     @Override
@@ -52,15 +58,15 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        
-        
-        if(powerUpCount % 800 == 0){            // wenn 800 * 5 ticks vergangen sind führe aus
-            powerUpCount +=1;
-            if (!powerUpSpawned){
-            spawnPowerup();}
-            
-        }else{
-            powerUpCount +=1;
+
+        if (powerUpCount % 800 == 0) { // wenn 800 * 5 ticks vergangen sind führe aus
+            powerUpCount += 1;
+            if (!powerUpSpawned) {
+                spawnPowerup();
+            }
+
+        } else {
+            powerUpCount += 1;
         }
         ballX += ballXDir;
         ballY += ballYDir;
@@ -78,9 +84,8 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
         if (ballX < 0 || ballX > 500) {
             ballX = 250;
             ballY = 250;
-            resetStats();  // reset stats
+            resetStats(); // reset stats
         }
-        
 
         repaint();
     }
@@ -90,8 +95,8 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
 
         powerUpSpawned = true;
         Random rand = new Random();
-        powerupX = rand.nextInt(460) + 20;  // x-Position zwischen 20 und 480
-        powerupY = rand.nextInt(440) + 20;  // y-Position zwischen 20 und 440
+        powerupX = rand.nextInt(460) + 20; // x-Position zwischen 20 und 480
+        powerupY = rand.nextInt(440) + 20; // y-Position zwischen 20 und 440
     }
 
     @Override
@@ -119,11 +124,11 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                     PADDLE_WIDTH_1 += 30;
                     powerUpSpawned = false;
                     break;
-                
+
                 default:
                     break;
             }
-            
+
         }
 
         // Powerup für Spieler 2 (L drücken)
@@ -136,7 +141,7 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
                     PADDLE_WIDTH_2 += 30;
                     powerUpSpawned = false;
                     break;
-                
+
                 default:
                     break;
             }
@@ -144,10 +149,12 @@ public class PongGame extends JPanel implements ActionListener, KeyListener {
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {}
+    public void keyReleased(KeyEvent e) {
+    }
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Pong Game");
