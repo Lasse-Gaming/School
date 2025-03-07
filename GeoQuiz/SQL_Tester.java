@@ -23,22 +23,24 @@ class SQL_Tester {
   private static JTextField usernameField;
   private static JLabel passwordLabel;
   private static JTextField passwordField;
-  private static JButton logInSubmitButton;
-  private static JLabel logInFeedbackLabel;
+  private static JButton loginButton;
+  private static JButton registerButton;
+  private static JLabel loginFeedbackLabel;
   private static JLabel questionLabel;
   private static JTextField answerField;
   private static JButton submitButton;
   private static JLabel feedbackLabel;
   private static JLabel scoreLabel;
   private static JLabel highscoreLabel;
-  private static JPanel logInPanel;
+  private static JPanel loginPanel;
   private static JPanel gamePanel;
+  private static int frameWidth = 800;
 
   public static void main(String[] args) {
 
     frame = new JFrame("GeoQuiz");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(600, 600 * 9 / 16);
+    frame.setSize(frameWidth, frameWidth * 9 / 16);
     frame.setLayout(new FlowLayout());
 
     view();
@@ -56,68 +58,87 @@ class SQL_Tester {
 
   public static void login() {
 
-    logInPanel = new JPanel();
-    logInPanel.setLayout(new GridLayout(3, 2));
+    loginPanel = new JPanel();
+    loginPanel.setLayout(new GridLayout(4, 2));
 
     usernameLabel = new JLabel("Username:");
-    logInPanel.add(usernameLabel);
+    loginPanel.add(usernameLabel);
 
     usernameField = new JTextField();
-    logInPanel.add(usernameField);
+    loginPanel.add(usernameField);
 
     passwordLabel = new JLabel("Password:");
-    logInPanel.add(passwordLabel);
+    loginPanel.add(passwordLabel);
 
-    passwordField = new JTextField();
-    logInPanel.add(passwordField);
+    passwordField = new JPasswordField();
+    loginPanel.add(passwordField);
 
-    logInSubmitButton = new JButton("Submit");
-    logInPanel.add(logInSubmitButton);
+    loginButton = new JButton("Login");
+    loginPanel.add(loginButton);
 
-    logInFeedbackLabel = new JLabel("");
-    logInPanel.add(logInFeedbackLabel);
+    registerButton = new JButton("Register");
+    loginPanel.add(registerButton);
 
-    logInSubmitButton.addActionListener(new ActionListener() {
+    loginFeedbackLabel = new JLabel("");
+    loginPanel.add(loginFeedbackLabel);
+
+    loginButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == logInSubmitButton) {
-          handleLogInSubmit();
-        }
+        loginUser();
       }
     });
-    frame.add(logInPanel);
-    logInPanel.setVisible(true);
+
+    registerButton.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        registerUser();
+      }
+
+    });
+
+    frame.add(loginPanel);
+    loginPanel.setVisible(true);
   }
 
-  private static void handleLogInSubmit() {
+  private static void loginUser() {
     String username = usernameField.getText();
     String password = passwordField.getText();
-    boolean correct = checkLogin(username, password);
-    showLogInFeedback(correct);
-  }
-
-  public static void showLogInFeedback(boolean valid) {
-    if (!valid) {
-      logInFeedbackLabel.setText("The login data is not correct");
-    }
-  }
-
-  public static boolean checkLogin(String username, String password) {
     try {
       String befehl = "Select highscore From User Where user = '" + username + "' and password = '" + password + "';";
       System.out.printf(">> %s%n", befehl);
       ResultSet ergebnis = datenbank.executeQuery(befehl);
-      for (int i = 1; i <= ergebnis.getMetaData().getColumnCount(); i++) {
-        ergebnis.next();
-        highscore = Integer.parseInt(ergebnis.getString(i));
-      }
+      ergebnis.next();
+      highscore = Integer.parseInt(ergebnis.getString(1));
+
       showHighscore();
       gamePanel.setVisible(true);
-      logInPanel.setVisible(false);
-      return true;
+      loginPanel.setVisible(false);
     } catch (SQLException e) {
       System.out.printf("FEHLER: %s%n", e.getMessage());
-      return false;
+      loginFeedbackLabel.setText("The login data is not correct");
+    }
+  }
+
+  public static void registerUser() {
+    try {
+      String befehl = "Select * From User Where user = '" + usernameField.getText() + "';";
+      System.out.printf(">> %s%n", befehl);
+      ResultSet ergebnis = datenbank.executeQuery(befehl);
+      if (!ergebnis.next()) {
+        befehl = "INSERT INTO `user`(`user`, `password`) VALUES ('" + usernameField.getText() + "','"
+            + passwordField.getText() + "');";
+        System.out.printf(">> %s%n", befehl);
+        datenbank.executeUpdate(befehl);
+        gamePanel.setVisible(true);
+        loginPanel.setVisible(false);
+      } else {
+        loginFeedbackLabel.setText("Username already taken!");
+      }
+    } catch (SQLException e) {
+      System.err.println(e);
+
     }
   }
 
@@ -135,7 +156,7 @@ class SQL_Tester {
           break;
 
         case "country":
-          questionSQL = "land.name, ort.name";
+          questionSQL = "ort.name, land.name";
           questionString = "In welchem Land liegt ";
           questionJoin = "land.lnr = ort.lnr";
           break;
@@ -219,9 +240,9 @@ class SQL_Tester {
     modeComboBox.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == modeComboBox) {
+        String selectedMode = (String) modeComboBox.getSelectedItem();
+        if (!selectedMode.equals(mode)) {
           System.out.println("Mode changed");
-          String selectedMode = (String) modeComboBox.getSelectedItem();
           mode = selectedMode;
           generateQuestions();
           showQuestion();
@@ -249,12 +270,11 @@ class SQL_Tester {
         }
       }
     });
+
     submitButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == submitButton) {
-          handleSubmit();
-        }
+        handleSubmit();
       }
     });
     frame.add(gamePanel);
@@ -301,7 +321,7 @@ class SQL_Tester {
         highscore = score;
       }
       score = 0;
-      answerField.setText("");
+
     }
     showFeedback(correct);
     if (index < questions.size()) {
@@ -309,5 +329,7 @@ class SQL_Tester {
     } else {
       showHighscore();
     }
+    answerField.setText("");
+    answerField.requestFocus();
   }
 }
