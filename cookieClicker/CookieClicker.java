@@ -47,8 +47,12 @@ public class CookieClicker {
         // Center Panel for the click button
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new GridBagLayout());
-        ImageIcon cookieIcon = new ImageIcon("cookie.png"); // Ensure cookie.png is in the same directory or provide
-                                                            // full path
+        ImageIcon cookieIcon = new ImageIcon(
+                "C:\\Users\\Lasse\\Documents\\OOP\\Adventure\\School\\cookieClicker\\cookie.png"); // Ensure cookie.png
+                                                                                                   // is in the same
+                                                                                                   // directory or
+                                                                                                   // provide
+        // full path
         clickButton = new JButton(cookieIcon);
         clickButton.setBorderPainted(false);
         clickButton.setContentAreaFilled(false);

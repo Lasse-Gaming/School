@@ -35,6 +35,8 @@ class SQL_Tester {
   private static JPanel loginPanel;
   private static JPanel gamePanel;
   private static int frameWidth = 800;
+  private static GeoGuesserPanel germanyPanel = new GeoGuesserPanel(
+      "C:\\Users\\Lasse\\Documents\\OOP\\Adventure\\School\\GeoQuiz\\germany.jpg");
 
   public static void main(String[] args) {
 
@@ -142,6 +144,31 @@ class SQL_Tester {
     }
   }
 
+  public static void geoguesser() {
+    frame.setLayout(new FlowLayout());
+    frame.setSize(626, 626);
+    germanyPanel.setVisible(true);
+    gamePanel.setVisible(false);
+    frame.setLayout(new BorderLayout()); // Set BorderLayout for the frame
+    frame.add(germanyPanel, BorderLayout.CENTER);
+
+  }
+
+  public static void coordianteValidation(double lat, double lon) {
+    double answerlat = 53.0830;
+    double answerlon = 8.8170;
+    ;
+    if (areEqual(answerlat, lat, 0.1) && areEqual(answerlon, lon, 1.1)) {
+      System.out.println("correct");
+    } else {
+      System.out.println("false");
+    }
+  }
+
+  public static boolean areEqual(double a, double b, double tolerance) {
+    return Math.abs(a - b) <= tolerance;
+  }
+
   public static void generateQuestions() {
     String befehl;
     String questionSQL;
@@ -232,7 +259,7 @@ class SQL_Tester {
     JLabel modeLabel = new JLabel("Select Mode:");
     gamePanel.add(modeLabel);
 
-    String[] modes = { "capital", "country" };
+    String[] modes = { "capital", "country", "geoguesser" };
     JComboBox<String> modeComboBox = new JComboBox<>(modes);
     modeComboBox.setSelectedItem(mode);
     gamePanel.add(modeComboBox);
@@ -246,6 +273,9 @@ class SQL_Tester {
           mode = selectedMode;
           generateQuestions();
           showQuestion();
+          if (mode.equals("geoguesser")) {
+            geoguesser();
+          }
         }
       }
     });
