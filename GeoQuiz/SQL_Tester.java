@@ -12,125 +12,149 @@ class SQL_Tester {
   static int score = 0;
   static int highscore = 0;
   static MySQLConnector datenbank = new MySQLConnector("root", "", "127.0.0.1", "geoquiz");
+  private static ArrayList<String> questions = new ArrayList<>();
+  private static ArrayList<String> answers = new ArrayList<>();
+  private static ArrayList<Integer> questionSequence;
+  private static String mode = "capital";
+  private static String region = "EU";
+  private static int index = 0;
+  private static JFrame frame;
+  private static JLabel usernameLabel;
+  private static JTextField usernameField;
+  private static JLabel passwordLabel;
+  private static JTextField passwordField;
+  private static JButton logInSubmitButton;
+  private static JLabel logInFeedbackLabel;
+  private static JLabel questionLabel;
+  private static JTextField answerField;
+  private static JButton submitButton;
+  private static JLabel feedbackLabel;
+  private static JLabel scoreLabel;
+  private static JLabel highscoreLabel;
+  private static JPanel logInPanel;
+  private static JPanel gamePanel;
 
   public static void main(String[] args) {
+
+    frame = new JFrame("GeoQuiz");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(600, 600 * 9 / 16);
+    frame.setLayout(new FlowLayout());
+
+    view();
+    login();
+    frame.setVisible(true);
     try {
       datenbank.connect();
     } catch (SQLException e) {
       System.out.println("Connection failed");
       return;
     }
-
-    Model model = new Model();
-    view view = new view(model);
-    controller controller = new controller(model, view);
-    model.generateQuestions();
-    view.showQuestion();
-    if (model.getHighscore() < model.getScore()) {
-      model.setHighscore(model.getScore());
-    }
-
-    model.setScore(0);
+    generateQuestions();
+    showQuestion();
   }
 
-  /*
-   * static void userLogIn(MySQLConnector datenbank) {
-   * String[] loginData = new String[2];
-   * 
-   * while (true) {
-   * try {
-   * datenbank.connect();
-   * System.out.println("Username:");
-   * String username = sc.nextLine();
-   * System.out.println("Password:");
-   * String password = sc.nextLine();
-   * 
-   * String befehl = "Select highscore From User Where user = ;";
-   * System.out.printf(">> %s%n", befehl);
-   * ResultSet ergebnis = datenbank.executeQuery(befehl);
-   * for (int i = 1; i <= ergebnis.getMetaData().getColumnCount(); i++) {
-   * loginData = (ergebnis.getString(i)).split(" ");
-   * }
-   * if (username == loginData[0] && password == loginData[1]) {
-   * 
-   * }
-   * } catch (Exception e) {
-   * System.out.println("user not valid");
-   * }
-   * break;
-   * }
-   * }
-   */
-}
+  public static void login() {
 
-class Model {
-  private String username;
-  private String password;
-  private int highscore;
-  private int score = 0;
-  private ArrayList<String> questions = new ArrayList<>();
-  private ArrayList<String> answers = new ArrayList<>();
-  private ArrayList<Integer> questionSequence;
-  private String mode = "capital";
-  private String region = "EU";
-  private int index = 0;
-  static MySQLConnector datenbank = new MySQLConnector("root", "", "127.0.0.1", "geoquiz");
-  static ResultSet ergebnis = null;
+    logInPanel = new JPanel();
+    logInPanel.setLayout(new GridLayout(3, 2));
 
-  public Model() {
+    usernameLabel = new JLabel("Username:");
+    logInPanel.add(usernameLabel);
+
+    usernameField = new JTextField();
+    logInPanel.add(usernameField);
+
+    passwordLabel = new JLabel("Password:");
+    logInPanel.add(passwordLabel);
+
+    passwordField = new JTextField();
+    logInPanel.add(passwordField);
+
+    logInSubmitButton = new JButton("Submit");
+    logInPanel.add(logInSubmitButton);
+
+    logInFeedbackLabel = new JLabel("");
+    logInPanel.add(logInFeedbackLabel);
+
+    logInSubmitButton.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == logInSubmitButton) {
+          handleLogInSubmit();
+        }
+      }
+    });
+    frame.add(logInPanel);
+    logInPanel.setVisible(true);
+  }
+
+  private static void handleLogInSubmit() {
+    String username = usernameField.getText();
+    String password = passwordField.getText();
+    boolean correct = checkLogin(username, password);
+    showLogInFeedback(correct);
+  }
+
+  public static void showLogInFeedback(boolean valid) {
+    if (!valid) {
+      logInFeedbackLabel.setText("The login data is not correct");
+    }
+  }
+
+  public static boolean checkLogin(String username, String password) {
     try {
-      datenbank.connect();
+      String befehl = "Select highscore From User Where user = '" + username + "' and password = '" + password + "';";
+      System.out.printf(">> %s%n", befehl);
+      ResultSet ergebnis = datenbank.executeQuery(befehl);
+      for (int i = 1; i <= ergebnis.getMetaData().getColumnCount(); i++) {
+        ergebnis.next();
+        highscore = Integer.parseInt(ergebnis.getString(i));
+      }
+      showHighscore();
+      gamePanel.setVisible(true);
+      logInPanel.setVisible(false);
+      return true;
     } catch (SQLException e) {
-      System.out.println("Connection failed");
+      System.out.printf("FEHLER: %s%n", e.getMessage());
+      return false;
     }
   }
 
-  public void generateQuestions() {
+  public static void generateQuestions() {
     String befehl;
     String questionSQL;
-    String answerSQL;
     String questionString;
     String questionJoin;
     try {
       switch (mode) {
         case "capital":
           questionString = "Was ist die Hauptstadt von ";
-          questionSQL = "land.name";
-          answerSQL = "ort.name";
+          questionSQL = "land.name, ort.name";
           questionJoin = "land.hauptonr = ort.onr";
           break;
 
         case "country":
-          questionSQL = "ort.name";
-          answerSQL = "land.name";
+          questionSQL = "land.name, ort.name";
           questionString = "In welchem Land liegt ";
           questionJoin = "land.lnr = ort.lnr";
           break;
         default:
-          questionSQL = "land.name";
-          answerSQL = "ort.name";
+          questionSQL = "land.name, ort.name";
           questionString = "Was ist die Hauptstadt von ";
           questionJoin = "land.hauptonr = ort.onr";
           break;
       }
-      for (ArrayList<String> variable : new ArrayList[] { questions, answers }) {
-        variable.clear();
-        if (variable == questions) {
-          befehl = "Select " + questionSQL + " From ort,land where " + questionJoin + " and " + questionSQL
-              + " IS NOT NULL and " + answerSQL + " IS NOT NULL and land.knr = '" + region
-              + "';";
-        } else {
-          befehl = "Select " + answerSQL + " From ort,land where land.hauptonr = ort.onr and land.knr = '" + region
-              + "';";
-          questionString = "";
-        }
-        System.out.printf(">> %s%n", befehl);
-        ResultSet ergebnis = datenbank.executeQuery(befehl);
-        while (ergebnis.next()) {
-          for (int i = 1; i <= ergebnis.getMetaData().getColumnCount(); i++) {
-            variable.add(questionString + ergebnis.getString(i));
-          }
-        }
+      questions.clear();
+      answers.clear();
+      befehl = "Select " + questionSQL + " From ort,land where " + questionJoin + " and " + questionSQL.split(", ")[0]
+          + " IS NOT NULL and " + questionSQL.split(", ")[1] + " IS NOT NULL and land.knr = '" + region
+          + "';";
+      System.out.printf(">> %s%n", befehl);
+      ResultSet ergebnis = datenbank.executeQuery(befehl);
+      while (ergebnis.next()) {
+        questions.add(questionString + ergebnis.getString(1));
+        answers.add(ergebnis.getString(2));
       }
     } catch (SQLException e) {
       System.out.printf("FEHLER: %s%n", e.getMessage());
@@ -146,137 +170,51 @@ class Model {
     return list;
   }
 
-  public String getCurrentAnswer() {
-    if (questionSequence.get(index) >= questionSequence.size()) {
+  public static String getCurrentAnswer() {
+    try {
+      return answers.get(questionSequence.get(index));
+    } catch (IndexOutOfBoundsException e) {
       return "No more questions";
     }
-    return answers.get(questionSequence.get(index));
   }
 
-  public String getCurrentQuestion() {
-    if (questionSequence.get(index) >= questionSequence.size()) {
+  public static String getCurrentQuestion() {
+    try {
+      return questions.get(questionSequence.get(index));
+    } catch (IndexOutOfBoundsException e) {
       return "No more questions";
     }
-    return questions.get(questionSequence.get(index));
   }
 
-  public ArrayList<String> getAnswers() {
-    return answers;
-  }
-
-  public ArrayList<Integer> getQuestionSequence() {
-    return questionSequence;
-  }
-
-  public ArrayList<String> getQuestions() {
-    return questions;
-  }
-
-  public int getScore() {
-    return score;
-  }
-
-  public void setScore(int score) {
-    this.score = score;
-  }
-
-  public void setAnswers(ArrayList<String> answers) {
-    this.answers = answers;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public int getHighscore() {
-    return highscore;
-  }
-
-  public void setHighscore(int highscore) {
-    this.highscore = highscore;
-  }
-
-  public int getIndex() {
-    return index;
-  }
-
-  public void setIndex(int index) {
-    this.index = index;
-  }
-
-  public String getMode() {
-    return mode;
-  }
-
-  public void setMode(String mode) {
-    this.mode = mode;
-  }
-
-  public String getRegion() {
-    return region;
-  }
-
-  public void setRegion(String region) {
-    this.region = region;
-  }
-
-  public void setUsername(String username) {
-    this.username = username;
-  }
-}
-
-class view {
-  private Model model;
-  private JFrame frame;
-  private JLabel questionLabel;
-  private JTextField answerField;
-  private JButton submitButton;
-  private JLabel feedbackLabel;
-  private JLabel scoreLabel;
-  private JLabel highscoreLabel;
-
-  public view(Model model) {
-    this.model = model;
-    frame = new JFrame("GeoQuiz");
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(400, 300);
-    frame.setLayout(new GridLayout(6, 1));
+  public static void view() {
+    gamePanel = new JPanel();
+    gamePanel.setLayout(new GridLayout(6, 2));
 
     questionLabel = new JLabel("Question will appear here");
-    frame.add(questionLabel);
+    gamePanel.add(questionLabel);
 
     answerField = new JTextField();
-    frame.add(answerField);
+    gamePanel.add(answerField);
 
     submitButton = new JButton("Submit");
-    frame.add(submitButton);
+    gamePanel.add(submitButton);
 
     feedbackLabel = new JLabel("");
-    frame.add(feedbackLabel);
+    gamePanel.add(feedbackLabel);
 
     scoreLabel = new JLabel("Score: 0");
-    frame.add(scoreLabel);
+    gamePanel.add(scoreLabel);
 
-    highscoreLabel = new JLabel("Highscore: " + model.getHighscore());
-    frame.add(highscoreLabel);
-    JPanel modePanel = new JPanel();
-    modePanel.setLayout(new FlowLayout());
+    highscoreLabel = new JLabel("Highscore: " + highscore);
+    gamePanel.add(highscoreLabel);
 
     JLabel modeLabel = new JLabel("Select Mode:");
-    modePanel.add(modeLabel);
+    gamePanel.add(modeLabel);
 
     String[] modes = { "capital", "country" };
     JComboBox<String> modeComboBox = new JComboBox<>(modes);
-    modeComboBox.setSelectedItem(model.getMode());
-    modePanel.add(modeComboBox);
+    modeComboBox.setSelectedItem(mode);
+    gamePanel.add(modeComboBox);
 
     modeComboBox.addActionListener(new ActionListener() {
       @Override
@@ -284,19 +222,33 @@ class view {
         if (e.getSource() == modeComboBox) {
           System.out.println("Mode changed");
           String selectedMode = (String) modeComboBox.getSelectedItem();
-          System.out.println(selectedMode);
-          model.setMode(selectedMode);
-          model.generateQuestions();
-          model.setIndex(0);
-          model.uniqueRandomNums(model.getQuestions().size());
+          mode = selectedMode;
+          generateQuestions();
           showQuestion();
-
         }
-
       }
     });
 
-    frame.add(modePanel);
+    JLabel regionLabel = new JLabel("Select Region:");
+    gamePanel.add(regionLabel);
+
+    String[] regions = { "EU", "NA" };
+    JComboBox<String> regionComboBox = new JComboBox<>(regions);
+    modeComboBox.setSelectedItem(region);
+    gamePanel.add(regionComboBox);
+
+    regionComboBox.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == regionComboBox) {
+          System.out.println("Region changed");
+          String selectedRegion = (String) regionComboBox.getSelectedItem();
+          region = selectedRegion;
+          generateQuestions();
+          showQuestion();
+        }
+      }
+    });
     submitButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -305,67 +257,57 @@ class view {
         }
       }
     });
-
-    frame.setVisible(true);
+    frame.add(gamePanel);
+    gamePanel.setVisible(false);
   }
 
-  public void showQuestion() {
-    questionLabel.setText(model.getCurrentQuestion() + "?");
-    System.out.println(model.getCurrentAnswer());
+  public void updateView() {
+    questionLabel.setText(getCurrentQuestion() + "?");
+    scoreLabel.setText("Score: " + score);
+    highscoreLabel.setText("Highscore: " + highscore);
+    feedbackLabel.setText("");
+  }
+
+  public static void showQuestion() {
+    questionLabel.setText(getCurrentQuestion() + "?");
+    System.out.println(getCurrentAnswer());
   }
 
   public String getInput() {
     return answerField.getText();
   }
 
-  public void showFeedback(boolean correct) {
+  public static void showFeedback(boolean correct) {
     if (correct) {
       feedbackLabel.setText("That's the right answer!");
     } else {
       feedbackLabel.setText("That's the wrong answer!");
     }
-    scoreLabel.setText("Score: " + model.getScore());
+    scoreLabel.setText("Score: " + score);
   }
 
-  public void showHighscore() {
-    highscoreLabel.setText("Your highscore is " + model.getHighscore());
+  public static void showHighscore() {
+    highscoreLabel.setText("Highscore: " + highscore);
   }
 
-  private void handleSubmit() {
+  private static void handleSubmit() {
     String input = answerField.getText();
-    boolean correct = input.equalsIgnoreCase(model.getCurrentAnswer());
+    boolean correct = input.equalsIgnoreCase(getCurrentAnswer());
     if (correct) {
-      model.setScore(model.getScore() + 1);
-      model.setIndex(model.getIndex() + 1);
+      score++;
+      index++;
     } else {
-      if (model.getHighscore() < model.getScore()) {
-        model.setHighscore(model.getScore());
+      if (highscore < score) {
+        highscore = score;
       }
-      model.setScore(0);
+      score = 0;
+      answerField.setText("");
     }
     showFeedback(correct);
-    if (model.getIndex() < model.getQuestions().size()) {
+    if (index < questions.size()) {
       showQuestion();
     } else {
       showHighscore();
     }
-  }
-}
-
-class controller {
-  private Model model;
-  private view view;
-
-  public controller(Model model, view view) {
-    this.model = model;
-    this.view = view;
-  }
-
-  public void setHighscore(int highscore) {
-    model.setHighscore(highscore);
-  }
-
-  public void showHighscore() {
-    view.showHighscore();
   }
 }
